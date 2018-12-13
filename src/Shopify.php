@@ -10,7 +10,6 @@
 
 namespace shopify;
 
-
 use Craft;
 use craft\base\Plugin;
 use craft\events\RegisterComponentTypesEvent;
@@ -19,6 +18,12 @@ use craft\services\Plugins;
 use craft\events\PluginEvent;
 use craft\web\twig\variables\CraftVariable;
 
+use shopify\services\ShopifyService;
+use shopify\fieldtypes\ProductFieldType;
+use shopify\variables\ShopifyVariables;
+
+use verbb\feedme\events\RegisterFeedMeFieldsEvent;
+use verbb\feedme\services\Fields as FeedMeFields;
 
 use yii\base\Event;
 
@@ -88,35 +93,30 @@ class Shopify extends Plugin
         parent::init();
         self::$plugin = $this;
 
-        // Do something after we're installed
-        Event::on(
-            Plugins::class,
-            Plugins::EVENT_AFTER_INSTALL_PLUGIN,
-            function (PluginEvent $event) {
-                if ($event->plugin === $this) {
-                    // We were just installed
-                }
-            }
-        );
 
-
-        //register to init-fields-event to add products-field to the list
+        // Register to init-fields-event to add products-field to the list
         Event::on(Fields::class, Fields::EVENT_REGISTER_FIELD_TYPES, function(RegisterComponentTypesEvent $event) {
-            $event->types[] = fieldtypes\ProductFieldType::class;
+            $event->types[] = ProductFieldType::class;
         });
 
 
-        //register services
+        // Register services
         $this->setComponents([
-            'service' => \shopify\services\ShopifyService::class
+            'service' => ShopifyService::class
         ]);
 
 
-        //register plugin variables/functions
+        // Register plugin variables/functions
         Event::on(CraftVariable::class, CraftVariable::EVENT_INIT, function(Event $event) {
             /** @var CraftVariable $variable */
             $variable = $event->sender;
-            $variable->set('shopify', variables\ShopifyVariables::class);
+            $variable->set('shopify', ShopifyVariables::class);
+        });
+
+
+        // Register fieldtype with Feed Me
+        Event::on(FeedMeFields::class, FeedMeFields::EVENT_REGISTER_FEED_ME_FIELDS, function(RegisterFeedMeFieldsEvent $event) {
+            $event->fields[] = utilities\feedme\Shopify::class;
         });
 
 
