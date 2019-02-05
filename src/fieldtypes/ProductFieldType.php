@@ -43,7 +43,8 @@ class ProductFieldType extends Field implements PreviewableFieldInterface
      */
     public function getSettingsHtml()
     {
-        return Craft::$app->getView()->renderTemplateMacro('_includes/forms', 'lightswitchField',
+        return Craft::$app->getView()->renderTemplateMacro(
+            '_includes/forms', 'lightswitchField',
             [
                 [
                     'label' => Craft::t('shopify', 'Allow multiple selections?'),
@@ -63,9 +64,11 @@ class ProductFieldType extends Field implements PreviewableFieldInterface
     public function getProducts()
     {
         if (!$this->products) {
-          $this->products = Shopify::getInstance()->service->getProducts([
-              'limit' => 250,
-          ]);
+            $this->products = Shopify::getInstance()->service->getProducts(
+                [
+                'limit' => 250,
+                ]
+            );
         }
 
         return $this->products;
@@ -74,8 +77,8 @@ class ProductFieldType extends Field implements PreviewableFieldInterface
     /**
      * Returns the template-partial an editor sees when editing plugin-content on a page
      *
-     * @param $value
-     * @param ElementInterface|null $element
+     * @param  $value
+     * @param  ElementInterface|null $element
      * @return string
      * @throws \Twig_Error_Loader
      * @throws \yii\base\Exception
@@ -92,7 +95,8 @@ class ProductFieldType extends Field implements PreviewableFieldInterface
         }
 
         if ($this->multi) {
-            return Craft::$app->getView()->renderTemplateMacro('_includes/forms', 'multiselectField',
+            return Craft::$app->getView()->renderTemplateMacro(
+                '_includes/forms', 'multiselectField',
                 [
                     [
                         'name' => $this->handle,
@@ -101,20 +105,21 @@ class ProductFieldType extends Field implements PreviewableFieldInterface
                     ]
                 ]
             );
-          } else {
+        } else {
             if (is_array($value)) {
-              $value = reset($value);
+                $value = reset($value);
             }
 
             $options = ['' => ''] + $options;
-            return Craft::$app->getView()->renderTemplateMacro('_includes/forms', 'selectField',
+            return Craft::$app->getView()->renderTemplateMacro(
+                '_includes/forms', 'selectField',
                 [
-                    [
-                        'id' => $this->handle,
-                        'name' => $this->handle.'[]',
-                        'value' => $value,
-                        'options' => $options,
-                    ]
+                  [
+                      'id' => $this->handle,
+                      'name' => $this->handle.'[]',
+                      'value' => $value,
+                      'options' => $options,
+                  ]
                 ]
             );
         }
@@ -148,10 +153,12 @@ class ProductFieldType extends Field implements PreviewableFieldInterface
         $products = $this->getProducts();
 
         $selected = [];
-        foreach ($products as $product) {
-            if (in_array($product['id'], $value)) {
-                $link = "https://{$settings->hostname}/admin/products/{$product['id']}";
-                $selected[] = "<a href=\"{$link}\" target=\"_blank\">{$product['title']}</a>";
+        if (is_array($products)) {
+            foreach ($products as $product) {
+                if (in_array($product['id'], $value)) {
+                    $link = "https://{$settings->hostname}/admin/products/{$product['id']}";
+                    $selected[] = "<a href=\"{$link}\" target=\"_blank\">{$product['title']}</a>";
+                }
             }
         }
 
