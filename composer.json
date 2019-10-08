@@ -20,15 +20,18 @@
       "homepage": "https://maier-niklas.de/"
     }
   ],
-  "require": {},
+  "require": {
+    "craftcms/cms": "^3.0.0",
+    "guzzlehttp/guzzle": "^6.3"
+  },
   "autoload": {
     "psr-4": {
-      "\\shopify\\": "src/"
+      "shopify\\": "src/"
     }
   },
   "extra": {
     "name": "Shopify",
     "handle": "shopify",
-    "class": "\\shopify\\Shopify"
+    "class": "shopify\\Shopify"
   }
 }
