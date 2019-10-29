@@ -63,12 +63,36 @@ class ProductFieldType extends Field implements PreviewableFieldInterface
      */
     public function getProducts()
     {
+        $limit = 250;
+        $page = 1;
+        $fields = 'id,title';
+
         if (!$this->products) {
-            $this->products = Shopify::getInstance()->service->getProducts(
+            $getProducts = Shopify::getInstance()->service->getProducts(
                 [
-                'limit' => 250,
+                    'limit' => $limit,
+                    'page' => $page,
+                    'fields' => $fields
                 ]
             );
+
+            $this->products = $getProducts;
+
+            // check the next page of products and add to product list
+            if (count($getProducts) == $limit) {
+                while (count($getProducts) > 0) {
+                    // increase page count to get products on next page
+                    $page++;
+                    $getProducts = Shopify::getInstance()->service->getProducts(
+                        [
+                            'limit' => $limit,
+                            'page' => $page,
+                            'fields' => $fields
+                        ]
+                    );
+                    $this->products = array_merge($this->products, $getProducts);
+                }
+            }
         }
 
         return $this->products;
