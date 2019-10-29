@@ -2,7 +2,7 @@
   "name": "cavellblood/craft-shopify-product-fetcher",
   "description": "Load your Shopify products into your craft3 cms instance",
   "type": "craft-plugin",
-  "version": "1.0.3",
+  "version": "1.0.4",
   "keywords": [
     "craft",
     "cms",
