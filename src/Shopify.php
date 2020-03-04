@@ -90,6 +90,9 @@ class Shopify extends Plugin
         parent::init();
         self::$plugin = $this;
 
+        /** @var Settings $settings */
+        $settings = $this->getSettings();
+
 
         // Register to init-fields-event to add products-field to the list
         Event::on(Fields::class, Fields::EVENT_REGISTER_FIELD_TYPES, function(RegisterComponentTypesEvent $event) {
@@ -101,6 +104,17 @@ class Shopify extends Plugin
         $this->setComponents([
             'service' => ShopifyService::class
         ]);
+
+
+        // Create a separate log file for Shopify to keep things sane
+        if ($settings->useSeparateLogfile) {
+            $fileTarget = new \craft\log\FileTarget([
+                'logFile' => Craft::$app->getPath()->getLogPath(true) . '/shopify-product-fetcher.log',
+                'categories' => ['shopify']
+            ]);
+
+            Craft::getLogger()->dispatcher->targets[] = $fileTarget;
+        }
 
 
         // Register plugin variables/functions
@@ -150,6 +164,24 @@ class Shopify extends Plugin
             ),
             __METHOD__
         );
+    }
+
+    /**
+     * @param string $message
+     * @param int $logLevel
+     */
+    public static function log($message, $logLevel = \yii\log\Logger::LEVEL_INFO)
+    {
+        /** @var Settings $settings */
+        $settings = self::$plugin->getSettings();
+
+        if ($settings->useSeparateLogfile) {
+            if ($logLevel <= $settings->logLevel || Craft::$app->getConfig()->getGeneral()->devMode) {
+                Craft::getLogger()->log($message, $logLevel, 'shopify');
+            }
+        } else {
+            Craft::getLogger()->log($message, $logLevel, 'shopify');
+        }
     }
 
 

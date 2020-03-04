@@ -24,6 +24,16 @@ class Settings extends Model
 
     public $singleProductEndpoint = 'admin/products/';
 
+    /**
+     * @var boolean
+     */
+    public $useSeparateLogfile = true;
+
+    /**
+     * @var int
+     */
+    public $logLevel = \yii\log\Logger::LEVEL_ERROR;
+
 
     public function rules()
     {
