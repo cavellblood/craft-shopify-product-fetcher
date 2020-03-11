@@ -19,7 +19,7 @@ class ShopifyService extends Component
      * @param array $options
      * @return bool
      */
-    public function getProducts($options = array())
+    public function getProducts($options = array(), $url = '')
     {
         $settings = \shopify\Shopify::getInstance()->getSettings();
 
