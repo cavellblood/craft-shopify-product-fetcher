@@ -8,7 +8,10 @@
 
 namespace shopify\services;
 
+use Craft;
+use shopify\Shopify;
 use yii\base\Component;
+use yii\log\Logger;
 
 class ShopifyService extends Component
 {
@@ -19,26 +22,35 @@ class ShopifyService extends Component
      * @param array $options
      * @return bool
      */
-    public function getProducts($options = array())
+    public function getProducts($options = array(), $url = '')
     {
         $settings = \shopify\Shopify::getInstance()->getSettings();
 
         $query = http_build_query($options);
-        $url = $this->getShopifyUrl($settings->allProductsEndpoint . '?' . $query, $settings);
-
+        if ($url) {
+            $shopifyUrl = $this->getShopifyUrl($url, $settings);
+        } else {
+            $shopifyUrl = $this->getShopifyUrl($settings->allProductsEndpoint . '?' . $query, $settings);
+        }
+        
         try {
             $client = new \GuzzleHttp\Client();
-            $response = $client->request('GET', $url);
+            $response = $client->request('GET', $shopifyUrl);
 
             if ($response->getStatusCode() !== 200) {
                 return false;
             }
-
-
+            
             $items = json_decode($response->getBody()->getContents(), true);
 
-            return $items['products'];
+            $reply = [
+                'products' => $items['products'],
+                'pagination' => $this->returnHeaderArray($response->getHeaders()['Link'][0])
+            ];
+
+            return $reply;
         } catch(\Exception $e) {
+            Shopify::log($e, Logger::LEVEL_ERROR);
             return false;
         }
     }
@@ -84,5 +96,39 @@ class ShopifyService extends Component
     private function getShopifyUrl($endpoint, \shopify\models\settings $settings)
     {
         return 'https://' . $settings->apiKey . ':' . $settings->password . '@' . $settings->hostname . '/' . $endpoint;
+    }
+
+
+    private function returnHeaderArray($linkHeader) {
+        $cleanArray = [];
+
+        if (strpos($linkHeader, ',') !== false) {
+            //Split into two or more elements by comma
+            $linkHeaderArr = explode(',', $linkHeader);
+        } else {
+            //Create array with one element
+            $linkHeaderArr[] = $linkHeader;
+        }
+
+        foreach ($linkHeaderArr as $linkHeader) {
+            $cleanArray += [
+                $this->extractRel($linkHeader) => $this->extractLink($linkHeader)
+            ];
+        }
+        return $cleanArray;
+    }
+
+
+    private function extractLink($element) {
+        if (preg_match('/<(.*?)>/', $element, $match) == 1) {
+            return $match[1];
+        }
+    }
+
+
+    private function extractRel($element) {
+        if (preg_match('/rel="(.*?)"/', $element, $match) == 1) {
+            return $match[1];
+        }
     }
 }

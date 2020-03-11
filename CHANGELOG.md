@@ -4,6 +4,10 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](http://keepachangelog.com/) and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## 1.0.7 - 2020-03-11
+### Changed
+- Updated to use cursor-based pagination when requesting the next page of results if store has more than 250 products.
+
 ## 1.0.6 - 2019-10-29
 ### Changed
 - List all the products. API was limited to 250 results per page. Plugin now looks at the next page of results until all products are added to the dropdown.

@@ -20,9 +20,19 @@ class Settings extends Model
 
     public $hostname; // valid-sample: craftintegration.myshopify.com //TODO validate user input to match format from sample
 
-    public $allProductsEndpoint = 'admin/products.json';
+    public $allProductsEndpoint = 'admin/api/2020-01/products.json';
 
     public $singleProductEndpoint = 'admin/products/';
+
+    /**
+     * @var boolean
+     */
+    public $useSeparateLogfile = true;
+
+    /**
+     * @var int
+     */
+    public $logLevel = \yii\log\Logger::LEVEL_ERROR;
 
 
     public function rules()
