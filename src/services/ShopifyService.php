@@ -40,11 +40,15 @@ class ShopifyService extends Component
             if ($response->getStatusCode() !== 200) {
                 return false;
             }
-
-
+            
             $items = json_decode($response->getBody()->getContents(), true);
 
-            return $items['products'];
+            $reply = [
+                'products' => $items['products'],
+                'pagination' => $this->returnHeaderArray($response->getHeaders()['Link'][0])
+            ];
+
+            return $reply;
         } catch(\Exception $e) {
             Shopify::log($e, Logger::LEVEL_ERROR);
             return false;
