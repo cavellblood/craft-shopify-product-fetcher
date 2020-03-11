@@ -8,7 +8,10 @@
 
 namespace shopify\services;
 
+use Craft;
+use shopify\Shopify;
 use yii\base\Component;
+use yii\log\Logger;
 
 class ShopifyService extends Component
 {
@@ -43,6 +46,7 @@ class ShopifyService extends Component
 
             return $items['products'];
         } catch(\Exception $e) {
+            Shopify::log($e, Logger::LEVEL_ERROR);
             return false;
         }
     }
