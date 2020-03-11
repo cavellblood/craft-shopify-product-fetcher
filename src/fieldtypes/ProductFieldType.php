@@ -8,6 +8,7 @@ use craft\base\ElementInterface;
 use craft\base\PreviewableFieldInterface;
 use craft\helpers\Json;
 use shopify\Shopify;
+use yii\log\Logger;
 
 class ProductFieldType extends Field implements PreviewableFieldInterface
 {
@@ -64,33 +65,31 @@ class ProductFieldType extends Field implements PreviewableFieldInterface
     public function getProducts()
     {
         $limit = 250;
-        $page = 1;
         $fields = 'id,title';
 
         if (!$this->products) {
-            $getProducts = Shopify::getInstance()->service->getProducts(
+            $reply = Shopify::getInstance()->service->getProducts(
                 [
                     'limit' => $limit,
-                    'page' => $page,
                     'fields' => $fields
                 ]
             );
 
-            $this->products = $getProducts;
+            $this->products = $reply['products'];
+
+            $nextUrl = explode(Shopify::getInstance()->getSettings()->hostname . '/', $reply['pagination']['next']);
 
             // check the next page of products and add to product list
-            if (count($getProducts) == $limit) {
-                while (count($getProducts) > 0) {
-                    // increase page count to get products on next page
-                    $page++;
-                    $getProducts = Shopify::getInstance()->service->getProducts(
+            if (array_key_exists('next', $reply['pagination'])) {
+                while (array_key_exists('next', $reply['pagination']) == true) {
+                    $reply = Shopify::getInstance()->service->getProducts(
                         [
                             'limit' => $limit,
-                            'page' => $page,
                             'fields' => $fields
-                        ]
+                        ],
+                        $nextUrl[1]
                     );
-                    $this->products = array_merge($this->products, $getProducts);
+                    $this->products = array_merge($this->products, $reply['products']);
                 }
             }
         }
