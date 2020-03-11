@@ -85,4 +85,38 @@ class ShopifyService extends Component
     {
         return 'https://' . $settings->apiKey . ':' . $settings->password . '@' . $settings->hostname . '/' . $endpoint;
     }
+
+
+    private function returnHeaderArray($linkHeader) {
+        $cleanArray = [];
+
+        if (strpos($linkHeader, ',') !== false) {
+            //Split into two or more elements by comma
+            $linkHeaderArr = explode(',', $linkHeader);
+        } else {
+            //Create array with one element
+            $linkHeaderArr[] = $linkHeader;
+        }
+
+        foreach ($linkHeaderArr as $linkHeader) {
+            $cleanArray += [
+                $this->extractRel($linkHeader) => $this->extractLink($linkHeader)
+            ];
+        }
+        return $cleanArray;
+    }
+
+
+    private function extractLink($element) {
+        if (preg_match('/<(.*?)>/', $element, $match) == 1) {
+            return $match[1];
+        }
+    }
+
+
+    private function extractRel($element) {
+        if (preg_match('/rel="(.*?)"/', $element, $match) == 1) {
+            return $match[1];
+        }
+    }
 }
