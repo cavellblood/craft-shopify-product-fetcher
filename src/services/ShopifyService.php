@@ -24,11 +24,15 @@ class ShopifyService extends Component
         $settings = \shopify\Shopify::getInstance()->getSettings();
 
         $query = http_build_query($options);
-        $url = $this->getShopifyUrl($settings->allProductsEndpoint . '?' . $query, $settings);
-
+        if ($url) {
+            $shopifyUrl = $this->getShopifyUrl($url, $settings);
+        } else {
+            $shopifyUrl = $this->getShopifyUrl($settings->allProductsEndpoint . '?' . $query, $settings);
+        }
+        
         try {
             $client = new \GuzzleHttp\Client();
-            $response = $client->request('GET', $url);
+            $response = $client->request('GET', $shopifyUrl);
 
             if ($response->getStatusCode() !== 200) {
                 return false;
